@@ -47,9 +47,21 @@ function rowToEvent(row: Record<string, unknown>): AnalyticsEvent | null {
 
 export function useAnalyticsStream({ cameras, onEvent, onConnectionMode, simulatedMode = false }: UseAnalyticsStreamProps): void {
   const camerasRef = useRef<Camera[]>(cameras);
+  const latestTsByCameraRef = useRef<Record<string, number>>({});
 
   useEffect(() => {
     camerasRef.current = cameras;
+  }, [cameras]);
+
+  useEffect(() => {
+    const active = new Set(cameras.map((camera) => camera.id));
+    const next: Record<string, number> = {};
+    Object.entries(latestTsByCameraRef.current).forEach(([cameraId, ts]) => {
+      if (active.has(cameraId)) {
+        next[cameraId] = ts;
+      }
+    });
+    latestTsByCameraRef.current = next;
   }, [cameras]);
 
   useEffect(() => {
@@ -68,6 +80,22 @@ export function useAnalyticsStream({ cameras, onEvent, onConnectionMode, simulat
       (camera) => camera.stream_url.startsWith('device://') || camera.stream_url.startsWith('camera://'),
     );
 
+    const dispatchIfFresh = (event: AnalyticsEvent) => {
+      const nextTs = Date.parse(event.ts);
+      if (Number.isNaN(nextTs)) {
+        onEvent(event);
+        return;
+      }
+
+      const previousTs = latestTsByCameraRef.current[event.camera_id] ?? 0;
+      if (nextTs < previousTs) {
+        return;
+      }
+
+      latestTsByCameraRef.current[event.camera_id] = nextTs;
+      onEvent(event);
+    };
+
     const startMock = () => {
       if (mockTimer !== null) {
         return;
@@ -76,7 +104,7 @@ export function useAnalyticsStream({ cameras, onEvent, onConnectionMode, simulat
       mockTimer = window.setInterval(() => {
         camerasRef.current
           .filter((camera) => camera.enabled)
-          .forEach((camera) => onEvent(generateMockEvent(camera)));
+          .forEach((camera) => dispatchIfFresh(generateMockEvent(camera)));
       }, 1000);
     };
 
@@ -99,7 +127,7 @@ export function useAnalyticsStream({ cameras, onEvent, onConnectionMode, simulat
             if ('type' in parsed && parsed.type === 'ping') {
               return;
             }
-            onEvent(parsed as AnalyticsEvent);
+            dispatchIfFresh(parsed as AnalyticsEvent);
           } catch {
             // Keep stream resilient to malformed payloads.
           }
@@ -138,7 +166,7 @@ export function useAnalyticsStream({ cameras, onEvent, onConnectionMode, simulat
 
           // Only dispatch for known cameras to avoid noise from unrelated rows.
           if (camerasRef.current.some((camera) => camera.id === event.camera_id)) {
-            onEvent(event);
+            dispatchIfFresh(event);
           }
         })
         .subscribe((status) => {

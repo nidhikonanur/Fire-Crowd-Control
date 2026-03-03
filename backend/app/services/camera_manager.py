@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import queue
 import threading
 from datetime import datetime, timezone
 from typing import Any
@@ -36,6 +37,14 @@ class CameraManager:
         self._latest_events: dict[str, dict[str, Any]] = {}
         self._last_alert_ts: dict[str, float] = {}
         self._lock = threading.Lock()
+        self._event_queue: queue.Queue[dict[str, Any]] = queue.Queue(maxsize=2048)
+        self._event_stop = threading.Event()
+        self._event_thread = threading.Thread(
+            target=self._process_event_queue,
+            name="analytics-event-processor",
+            daemon=True,
+        )
+        self._event_thread.start()
 
     def ensure_demo_camera(self) -> None:
         with self.session_factory() as db:
@@ -98,6 +107,8 @@ class CameraManager:
 
         for camera_id in camera_ids:
             self.stop_worker(camera_id)
+        self._event_stop.set()
+        self._event_thread.join(timeout=3.0)
 
     def latest_snapshot(self, camera_id: str) -> dict[str, Any] | None:
         with self._lock:
@@ -128,6 +139,43 @@ class CameraManager:
         worker.start()
 
     def _handle_worker_event(self, payload: dict[str, Any]) -> None:
+        try:
+            self._event_queue.put_nowait(payload)
+            return
+        except queue.Full:
+            pass
+
+        # Drop the oldest queued event under sustained load to keep real-time updates fresh.
+        try:
+            _ = self._event_queue.get_nowait()
+            self._event_queue.task_done()
+        except queue.Empty:
+            pass
+
+        try:
+            self._event_queue.put_nowait(payload)
+        except queue.Full:
+            log_event(
+                logger,
+                "camera_event_dropped",
+                camera_id=str(payload.get("camera_id", "")),
+                reason="event_queue_full",
+            )
+
+    def _process_event_queue(self) -> None:
+        while not self._event_stop.is_set() or not self._event_queue.empty():
+            try:
+                payload = self._event_queue.get(timeout=0.2)
+            except queue.Empty:
+                continue
+            try:
+                self._persist_and_broadcast_event(payload)
+            except Exception as exc:
+                log_event(logger, "camera_event_processing_failed", error=str(exc))
+            finally:
+                self._event_queue.task_done()
+
+    def _persist_and_broadcast_event(self, payload: dict[str, Any]) -> None:
         camera_id = str(payload.get("camera_id"))
         ts_raw = payload.get("ts")
 

@@ -6,26 +6,27 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import inspect
 
 from app.api.cameras import router as cameras_router
 from app.api.health import router as health_router
 from app.api.ws import router as ws_router
 from app.core.config import get_settings
 from app.core.logging import get_logger, log_event, setup_logging
-from app.db.base import Base
-from app.db.session import SessionLocal, engine
+from app.db.session import SessionLocal, check_database_connection, engine
 from app.services.broadcaster import AnalyticsBroadcaster
 from app.services.camera_manager import CameraManager
 
 settings = get_settings()
 setup_logging()
 logger = get_logger(__name__)
+REQUIRED_TABLES = {"cameras", "analytics_latest", "alerts"}
 
 app = FastAPI(title=settings.app_name)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins,
+    allow_origins=settings.cors_origins_list,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -40,7 +41,12 @@ app.mount("/data", StaticFiles(directory=str(settings.sample_video_path.parent))
 
 @app.on_event("startup")
 async def startup() -> None:
-    Base.metadata.create_all(bind=engine)
+    check_database_connection()
+    existing_tables = set(inspect(engine).get_table_names())
+    missing_tables = REQUIRED_TABLES - existing_tables
+    if missing_tables:
+        missing = ", ".join(sorted(missing_tables))
+        raise RuntimeError(f"Database schema is incomplete ({missing}). Run `alembic upgrade head`.")
 
     broadcaster = AnalyticsBroadcaster()
     broadcaster.set_loop(asyncio.get_running_loop())

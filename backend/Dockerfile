@@ -16,10 +16,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
+COPY alembic.ini ./alembic.ini
+COPY alembic ./alembic
+COPY scripts/start_backend.sh ./scripts/start_backend.sh
 COPY app ./app
 COPY data ./data
 COPY models ./models
 
+RUN chmod +x ./scripts/start_backend.sh
+
 EXPOSE 8000
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["./scripts/start_backend.sh"]

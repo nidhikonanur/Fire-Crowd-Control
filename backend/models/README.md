@@ -2,6 +2,12 @@ Drop your ONNX model here:
 
 - `backend/models/crowd_model_stride8.onnx`
 
+This file is tracked in Git LFS in the main repo. If backend logs show model pointer fallback, run:
+
+```bash
+git lfs pull
+```
+
 Training helper outputs:
 
 - Best checkpoint: `backend/models/checkpoints/csrnet_best.pt`

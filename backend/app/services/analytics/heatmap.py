@@ -29,19 +29,26 @@ def density_map_to_overlay_png_base64(
     density_map: np.ndarray,
     frame_size: tuple[int, int],
     alpha: float = 0.65,
+    max_width: int = 640,
+    png_compression: int = 3,
 ) -> str:
     frame_w, frame_h = frame_size
     alpha = float(np.clip(alpha, 0.0, 1.0))
+    max_width = max(1, int(max_width))
+    png_compression = int(np.clip(png_compression, 0, 9))
+
+    render_w = min(frame_w, max_width)
+    render_h = max(1, int(round(frame_h * (render_w / max(frame_w, 1)))))
 
     normalized = _normalize_density_map(density_map)
-    upscaled = cv2.resize(normalized, (frame_w, frame_h), interpolation=cv2.INTER_CUBIC)
+    upscaled = cv2.resize(normalized, (render_w, render_h), interpolation=cv2.INTER_LINEAR)
     heat = cv2.applyColorMap((upscaled * 255).astype(np.uint8), cv2.COLORMAP_JET)
 
     # OpenCV stores BGRA; PNG output is browser-safe when encoded.
     overlay_alpha = (upscaled * (255.0 * alpha)).astype(np.uint8)
     overlay_bgra = np.dstack((heat, overlay_alpha))
 
-    ok, encoded = cv2.imencode(".png", overlay_bgra)
+    ok, encoded = cv2.imencode(".png", overlay_bgra, [int(cv2.IMWRITE_PNG_COMPRESSION), png_compression])
     if not ok:
         return ""
     return base64.b64encode(encoded.tobytes()).decode("utf-8")

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 
-from sqlalchemy import Boolean, DateTime, Float, Integer, String, func
+from sqlalchemy import Boolean, CheckConstraint, DateTime, Float, Index, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
@@ -10,6 +10,12 @@ from app.db.base import Base
 
 class Camera(Base):
     __tablename__ = "cameras"
+    __table_args__ = (
+        CheckConstraint("target_fps BETWEEN 1 AND 5", name="ck_cameras_target_fps_range"),
+        CheckConstraint("alert_threshold >= 1", name="ck_cameras_alert_threshold_positive"),
+        Index("ix_cameras_enabled", "enabled"),
+        Index("ix_cameras_created_at", "created_at"),
+    )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     name: Mapped[str] = mapped_column(String(80), unique=True, nullable=False)

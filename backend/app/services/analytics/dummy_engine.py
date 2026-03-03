@@ -10,10 +10,29 @@ from app.services.analytics.heatmap import density_map_to_overlay_png_base64
 
 
 class DummyEngine:
-    def __init__(self, overlay_alpha: float = 0.65) -> None:
+    def __init__(
+        self,
+        overlay_alpha: float = 0.65,
+        heatmap_smoothing: float = 0.35,
+        heatmap_max_width: int = 640,
+        heatmap_png_compression: int = 3,
+    ) -> None:
         self.overlay_alpha = overlay_alpha
+        self.heatmap_smoothing = float(np.clip(heatmap_smoothing, 0.0, 0.95))
+        self.heatmap_max_width = max(1, int(heatmap_max_width))
+        self.heatmap_png_compression = int(np.clip(heatmap_png_compression, 0, 9))
         self.rng = np.random.default_rng()
         self.phase = self.rng.uniform(0, 2 * math.pi)
+        self._previous_density_map: np.ndarray | None = None
+
+    def _smooth_density_map(self, density_map: np.ndarray) -> np.ndarray:
+        previous = self._previous_density_map
+        if previous is not None and previous.shape == density_map.shape and self.heatmap_smoothing > 0.0:
+            current_weight = 1.0 - self.heatmap_smoothing
+            density_map = (current_weight * density_map) + (self.heatmap_smoothing * previous)
+        density_map = np.clip(density_map, 0.0, None).astype(np.float32)
+        self._previous_density_map = density_map
+        return density_map
 
     def infer(self, frame_bgr: np.ndarray) -> dict[str, object]:
         frame_h, frame_w = frame_bgr.shape[:2]
@@ -34,12 +53,15 @@ class DummyEngine:
 
         noise = self.rng.normal(loc=0.0, scale=0.08, size=(map_h, map_w)).astype(np.float32)
         density_map = np.clip(base * 0.35 + hotspot * 0.75 + noise, 0.0, 2.2).astype(np.float32)
+        density_map = self._smooth_density_map(density_map)
 
         crowd_count = float(np.clip(np.sum(density_map) * 0.19, 0.0, 1000.0))
         overlay_png_base64 = density_map_to_overlay_png_base64(
             density_map,
             frame_size=(frame_w, frame_h),
             alpha=self.overlay_alpha,
+            max_width=self.heatmap_max_width,
+            png_compression=self.heatmap_png_compression,
         )
 
         return {

@@ -12,11 +12,22 @@ logger = get_logger(__name__)
 def create_engine(settings: Settings) -> AnalyticsEngine:
     if settings.model_path.exists():
         try:
-            engine = ONNXEngine(model_path=settings.model_path, overlay_alpha=settings.overlay_alpha)
+            engine = ONNXEngine(
+                model_path=settings.model_path,
+                overlay_alpha=settings.overlay_alpha,
+                heatmap_smoothing=settings.heatmap_temporal_smoothing,
+                heatmap_max_width=settings.heatmap_max_width,
+                heatmap_png_compression=settings.heatmap_png_compression,
+            )
             log_event(logger, "engine_selected", engine="onnx", model_path=str(settings.model_path))
             return engine
         except Exception as exc:  # pragma: no cover - fallback behavior
             log_event(logger, "engine_fallback", reason=str(exc), fallback_engine="dummy")
 
     log_event(logger, "engine_selected", engine="dummy")
-    return DummyEngine(overlay_alpha=settings.overlay_alpha)
+    return DummyEngine(
+        overlay_alpha=settings.overlay_alpha,
+        heatmap_smoothing=settings.heatmap_temporal_smoothing,
+        heatmap_max_width=settings.heatmap_max_width,
+        heatmap_png_compression=settings.heatmap_png_compression,
+    )

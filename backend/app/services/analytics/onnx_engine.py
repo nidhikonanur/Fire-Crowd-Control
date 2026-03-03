@@ -18,13 +18,29 @@ IMAGENET_STD = np.array([0.229, 0.224, 0.225], dtype=np.float32)
 
 
 class ONNXEngine:
-    def __init__(self, model_path: Path, overlay_alpha: float = 0.65) -> None:
+    def __init__(
+        self,
+        model_path: Path,
+        overlay_alpha: float = 0.65,
+        heatmap_smoothing: float = 0.35,
+        heatmap_max_width: int = 640,
+        heatmap_png_compression: int = 3,
+    ) -> None:
         if ort is None:
             raise RuntimeError("onnxruntime is unavailable")
         if not model_path.exists():
             raise FileNotFoundError(f"Model file not found: {model_path}")
+        if self._is_lfs_pointer(model_path):
+            raise RuntimeError(
+                f"Model path points to a Git LFS pointer, not an ONNX binary: {model_path}. "
+                "Run `git lfs pull` to fetch the model artifact."
+            )
 
         self.overlay_alpha = overlay_alpha
+        self.heatmap_smoothing = float(np.clip(heatmap_smoothing, 0.0, 0.95))
+        self.heatmap_max_width = max(1, int(heatmap_max_width))
+        self.heatmap_png_compression = int(np.clip(heatmap_png_compression, 0, 9))
+        self._previous_density_map: np.ndarray | None = None
         self.session = ort.InferenceSession(str(model_path), providers=["CPUExecutionProvider"])
         input_meta = self.session.get_inputs()[0]
         output_meta = self.session.get_outputs()[0]
@@ -33,6 +49,11 @@ class ONNXEngine:
         self.input_shape = input_meta.shape
         self.output_shape = output_meta.shape
         self.layout = self._infer_layout(self.input_shape, self.output_shape)
+
+    def _is_lfs_pointer(self, model_path: Path) -> bool:
+        with model_path.open("rb") as handle:
+            header = handle.read(128)
+        return b"git-lfs.github.com/spec/v1" in header
 
     def _dim_is(self, shape: list[Any] | tuple[Any, ...], index: int, expected: int) -> bool:
         if len(shape) <= index:
@@ -104,16 +125,27 @@ class ONNXEngine:
         density = np.clip(density, 0.0, None)
         return density.astype(np.float32)
 
+    def _smooth_density_map(self, density_map: np.ndarray) -> np.ndarray:
+        previous = self._previous_density_map
+        if previous is not None and previous.shape == density_map.shape and self.heatmap_smoothing > 0.0:
+            current_weight = 1.0 - self.heatmap_smoothing
+            density_map = (current_weight * density_map) + (self.heatmap_smoothing * previous)
+        density_map = np.clip(density_map, 0.0, None).astype(np.float32)
+        self._previous_density_map = density_map
+        return density_map
+
     def infer(self, frame_bgr: np.ndarray) -> dict[str, object]:
         model_input, frame_size = self._preprocess(frame_bgr)
         output = self.session.run([self.output_name], {self.input_name: model_input})[0]
-        density_map = self._extract_density_map(output)
+        density_map = self._smooth_density_map(self._extract_density_map(output))
 
         crowd_count = float(np.sum(density_map))
         overlay_png_base64 = density_map_to_overlay_png_base64(
             density_map,
             frame_size=frame_size,
             alpha=self.overlay_alpha,
+            max_width=self.heatmap_max_width,
+            png_compression=self.heatmap_png_compression,
         )
 
         return {

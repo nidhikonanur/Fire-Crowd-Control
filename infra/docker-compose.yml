@@ -1,20 +1,49 @@
-version: '3.9'
-
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sfd-crowd-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-sfd_crowd}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - '5432:5432'
+    volumes:
+      - sfd_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-sfd_crowd}']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
   backend:
     build:
       context: ../backend
     container_name: sfd-crowd-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
     environment:
-      DATABASE_URL: ${DATABASE_URL:-sqlite:////app/db/sfd_crowd.db}
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://postgres:postgres@postgres:5432/sfd_crowd}
+      ALLOW_SQLITE: ${ALLOW_SQLITE:-false}
+      DATABASE_ECHO: ${DATABASE_ECHO:-false}
+      DATABASE_POOL_SIZE: ${DATABASE_POOL_SIZE:-10}
+      DATABASE_MAX_OVERFLOW: ${DATABASE_MAX_OVERFLOW:-20}
+      DATABASE_POOL_TIMEOUT: ${DATABASE_POOL_TIMEOUT:-30}
+      DATABASE_POOL_RECYCLE: ${DATABASE_POOL_RECYCLE:-1800}
+      DATABASE_CONNECT_TIMEOUT: ${DATABASE_CONNECT_TIMEOUT:-10}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173}
       SUPABASE_URL: ${SUPABASE_URL:-}
       SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-}
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
+      OVERLAY_ALPHA: ${OVERLAY_ALPHA:-0.65}
+      HEATMAP_TEMPORAL_SMOOTHING: ${HEATMAP_TEMPORAL_SMOOTHING:-0.35}
+      HEATMAP_MAX_WIDTH: ${HEATMAP_MAX_WIDTH:-640}
+      HEATMAP_PNG_COMPRESSION: ${HEATMAP_PNG_COMPRESSION:-3}
     ports:
       - '8000:8000'
     volumes:
-      - sfd_backend_db:/app/db
       - ../backend/data:/app/data
       - ../backend/models:/app/models
     restart: unless-stopped
@@ -34,4 +63,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  sfd_backend_db:
+  sfd_postgres_data:
