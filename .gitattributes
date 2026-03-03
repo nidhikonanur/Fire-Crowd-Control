@@ -1,7 +1,8 @@
 backend/models/*.onnx filter=lfs diff=lfs merge=lfs -text
 backend/models/*.keras filter=lfs diff=lfs merge=lfs -text
-backend/models/*.h5 filter=lfs diff=lfs merge=lfs -textkaggle_outputs/**/*.onnx filter=lfs diff=lfs merge=lfs -text
-kaggle_outputs/**/*.keras filter=lfs diff=lfs merge=lfs -text
-kaggle_outputs/**/*.h5 filter=lfs diff=lfs merge=lfs -text
+backend/models/*.h5 filter=lfs diff=lfs merge=lfs -text
+kaggle_outputs/csrnet_v9/*.onnx filter=lfs diff=lfs merge=lfs -text
+kaggle_outputs/csrnet_v9/*.keras filter=lfs diff=lfs merge=lfs -text
+kaggle_outputs/csrnet_v9/*.h5 filter=lfs diff=lfs merge=lfs -text
 kaggle_outputs/csrnet_v9/csrnet_shanghaitechA_task1.keras filter=lfs diff=lfs merge=lfs -text
 kaggle_outputs/csrnet_v9/csrnet_shanghaitechA_task1.weights.h5 filter=lfs diff=lfs merge=lfs -text
