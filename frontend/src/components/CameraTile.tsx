@@ -194,8 +194,8 @@ export function CameraTile({ camera, latest, history, paused, onTogglePause }: C
   };
 
   return (
-    <article className="group overflow-hidden rounded-[24px] border border-[hsl(var(--border))] bg-[hsl(var(--panel))]/92 shadow-[0_18px_40px_rgba(0,0,0,0.16)] transition-all duration-150 hover:-translate-y-0.5 hover:border-[hsl(var(--accent))]/25">
-      <div className="relative aspect-video overflow-hidden bg-black">
+    <article className="group overflow-hidden rounded-[28px] border border-white/85 bg-white/95 shadow-[0_24px_60px_rgba(148,163,184,0.18)] transition-all duration-150 hover:-translate-y-1 hover:shadow-[0_28px_80px_rgba(148,163,184,0.22)]">
+      <div className="relative aspect-video overflow-hidden bg-slate-900">
         <video
           ref={videoRef}
           className={cn(
@@ -250,13 +250,13 @@ export function CameraTile({ camera, latest, history, paused, onTogglePause }: C
         <button
           type="button"
           onClick={() => setOverlayEnabled((prev) => !prev)}
-          className="absolute right-2 top-2 rounded-xl border border-white/10 bg-black/40 p-1.5 text-white/80 backdrop-blur"
+          className="absolute right-3 top-3 rounded-2xl border border-white/50 bg-white/75 p-2 text-slate-600 backdrop-blur"
           aria-label={overlayEnabled ? 'Hide density overlay' : 'Show density overlay'}
         >
           {overlayEnabled ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
         </button>
 
-        <div className="absolute inset-x-0 bottom-0 flex translate-y-1 items-center justify-end gap-1 bg-gradient-to-t from-black/60 via-black/20 to-transparent p-2 opacity-0 transition-all duration-150 group-hover:translate-y-0 group-hover:opacity-100">
+        <div className="absolute inset-x-0 bottom-0 flex translate-y-1 items-center justify-end gap-1 bg-gradient-to-t from-slate-950/70 via-slate-900/15 to-transparent p-3 opacity-0 transition-all duration-150 group-hover:translate-y-0 group-hover:opacity-100">
           <Button size="sm" variant="secondary" onClick={() => navigate(`/camera/${camera.id}`)} className="pointer-events-auto">
             <ScanSearch className="mr-1 h-3.5 w-3.5" />
             Detail
@@ -272,30 +272,30 @@ export function CameraTile({ camera, latest, history, paused, onTogglePause }: C
         </div>
       </div>
 
-      <div className="space-y-3 p-4">
+      <div className="space-y-3 p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h3 className="truncate text-sm font-semibold">{camera.name}</h3>
+            <h3 className="truncate text-sm font-semibold text-slate-900">{camera.name}</h3>
             <p className="truncate text-xs text-[hsl(var(--muted-foreground))]">{camera.stream_url}</p>
           </div>
           <div className="text-right">
             <p className="text-xs text-[hsl(var(--muted-foreground))]">Crowd</p>
-            <p className="font-mono text-2xl font-semibold">{crowdCount.toFixed(1)}</p>
+            <p className="font-mono text-2xl font-semibold text-slate-900">{crowdCount.toFixed(1)}</p>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-2 text-xs">
-          <div className="rounded-[16px] border border-[hsl(var(--border))] bg-[hsl(var(--panel-2))] px-3 py-2">
+          <div className="rounded-[18px] border border-[hsl(var(--border))] bg-[hsl(var(--panel-2))] px-3 py-2.5">
             <p className="text-[hsl(var(--muted-foreground))]">FPS</p>
-            <p className="font-mono">{fps.toFixed(2)}</p>
+            <p className="font-mono text-slate-900">{fps.toFixed(2)}</p>
           </div>
-          <div className="rounded-[16px] border border-[hsl(var(--border))] bg-[hsl(var(--panel-2))] px-3 py-2">
+          <div className="rounded-[18px] border border-[hsl(var(--border))] bg-[hsl(var(--panel-2))] px-3 py-2.5">
             <p className="text-[hsl(var(--muted-foreground))]">Latency</p>
-            <p className="font-mono">{latency.toFixed(1)} ms</p>
+            <p className="font-mono text-slate-900">{latency.toFixed(1)} ms</p>
           </div>
         </div>
 
-        <div className="h-11 rounded-[18px] border border-[hsl(var(--border))] bg-[hsl(var(--panel-2))] px-1 py-1">
+        <div className="h-11 rounded-[20px] border border-[hsl(var(--border))] bg-[hsl(var(--panel-2))] px-1 py-1">
           {sparkData.length > 1 ? (
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={sparkData}>

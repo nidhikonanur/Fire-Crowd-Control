@@ -4,19 +4,19 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--background))] disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center whitespace-nowrap rounded-2xl text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--background))] disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
-        default: 'bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] hover:bg-[hsl(var(--accent-2))]',
-        secondary: 'bg-[hsl(var(--panel-2))] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--panel-3))] border border-[hsl(var(--border))]',
+        default: 'bg-[hsl(var(--accent))] text-[hsl(var(--accent-foreground))] shadow-[0_12px_24px_hsl(var(--accent)/0.24)] hover:bg-[hsl(var(--accent-2))]',
+        secondary: 'border border-[hsl(var(--border))] bg-[hsl(var(--panel))] text-[hsl(var(--foreground))] hover:bg-[hsl(var(--panel-2))]',
         ghost: 'text-[hsl(var(--foreground))] hover:bg-[hsl(var(--panel-2))]',
         danger: 'bg-[hsl(var(--danger))] text-white hover:bg-[hsl(var(--danger-2))]',
       },
       size: {
-        default: 'h-9 px-4 py-2',
-        sm: 'h-8 rounded-md px-3 text-xs',
-        lg: 'h-10 rounded-md px-6',
+        default: 'h-10 px-4 py-2',
+        sm: 'h-8 rounded-xl px-3 text-xs',
+        lg: 'h-11 rounded-2xl px-6',
         icon: 'h-9 w-9',
       },
     },
