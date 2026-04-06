@@ -79,9 +79,9 @@ export function DashboardPage(): JSX.Element {
         <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
           <div className="max-w-3xl space-y-3">
             <p className="text-[11px] uppercase tracking-[0.26em] text-[hsl(var(--accent))]">Dashboard overview</p>
-            <h1 className="text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">Modern operations view for live crowd monitoring.</h1>
+            <h1 className="text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">Operations dashboard</h1>
             <p className="max-w-2xl text-sm leading-6 text-[hsl(var(--muted-foreground))]">
-              Keep camera health, occupancy signals, and alerts in one bright, readable workspace designed for quick scanning.
+              Keep camera health, crowd signals, and alerts in one readable workspace for day-to-day monitoring.
             </p>
           </div>
 

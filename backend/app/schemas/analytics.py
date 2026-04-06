@@ -14,4 +14,5 @@ class AnalyticsEvent(BaseModel):
     latency_ms: float = Field(ge=0)
     crowd_count: float = Field(ge=0)
     density_overlay_png_base64: str
+    frame_jpeg_base64: str | None = None
     message: str | None = None
