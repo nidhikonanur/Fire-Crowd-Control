@@ -194,8 +194,8 @@ export function CameraTile({ camera, latest, history, paused, onTogglePause }: C
   };
 
   return (
-    <article className="group rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--panel))] transition-colors duration-150">
-      <div className="relative aspect-video overflow-hidden rounded-t-lg bg-black">
+    <article className="group overflow-hidden rounded-[24px] border border-[hsl(var(--border))] bg-[hsl(var(--panel))]/92 shadow-[0_18px_40px_rgba(0,0,0,0.16)] transition-all duration-150 hover:-translate-y-0.5 hover:border-[hsl(var(--accent))]/25">
+      <div className="relative aspect-video overflow-hidden bg-black">
         <video
           ref={videoRef}
           className={cn(
@@ -250,13 +250,13 @@ export function CameraTile({ camera, latest, history, paused, onTogglePause }: C
         <button
           type="button"
           onClick={() => setOverlayEnabled((prev) => !prev)}
-          className="absolute right-2 top-2 rounded border border-[hsl(var(--border))] bg-black/40 p-1.5 text-white/80"
+          className="absolute right-2 top-2 rounded-xl border border-white/10 bg-black/40 p-1.5 text-white/80 backdrop-blur"
           aria-label={overlayEnabled ? 'Hide density overlay' : 'Show density overlay'}
         >
           {overlayEnabled ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
         </button>
 
-        <div className="absolute inset-x-0 bottom-0 flex translate-y-1 items-center justify-end gap-1 p-2 opacity-0 transition-all duration-150 group-hover:translate-y-0 group-hover:opacity-100">
+        <div className="absolute inset-x-0 bottom-0 flex translate-y-1 items-center justify-end gap-1 bg-gradient-to-t from-black/60 via-black/20 to-transparent p-2 opacity-0 transition-all duration-150 group-hover:translate-y-0 group-hover:opacity-100">
           <Button size="sm" variant="secondary" onClick={() => navigate(`/camera/${camera.id}`)} className="pointer-events-auto">
             <ScanSearch className="mr-1 h-3.5 w-3.5" />
             Detail
@@ -272,7 +272,7 @@ export function CameraTile({ camera, latest, history, paused, onTogglePause }: C
         </div>
       </div>
 
-      <div className="space-y-2 p-3">
+      <div className="space-y-3 p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h3 className="truncate text-sm font-semibold">{camera.name}</h3>
@@ -285,17 +285,17 @@ export function CameraTile({ camera, latest, history, paused, onTogglePause }: C
         </div>
 
         <div className="grid grid-cols-2 gap-2 text-xs">
-          <div className="rounded border border-[hsl(var(--border))] px-2 py-1.5">
+          <div className="rounded-[16px] border border-[hsl(var(--border))] bg-[hsl(var(--panel-2))] px-3 py-2">
             <p className="text-[hsl(var(--muted-foreground))]">FPS</p>
             <p className="font-mono">{fps.toFixed(2)}</p>
           </div>
-          <div className="rounded border border-[hsl(var(--border))] px-2 py-1.5">
+          <div className="rounded-[16px] border border-[hsl(var(--border))] bg-[hsl(var(--panel-2))] px-3 py-2">
             <p className="text-[hsl(var(--muted-foreground))]">Latency</p>
             <p className="font-mono">{latency.toFixed(1)} ms</p>
           </div>
         </div>
 
-        <div className="h-11 rounded border border-[hsl(var(--border))] px-1 py-1">
+        <div className="h-11 rounded-[18px] border border-[hsl(var(--border))] bg-[hsl(var(--panel-2))] px-1 py-1">
           {sparkData.length > 1 ? (
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={sparkData}>

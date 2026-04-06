@@ -62,18 +62,21 @@ export function Layout({
 
   return (
     <div className="min-h-screen bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
-      <div className="relative z-10 flex min-h-screen">
+      <div className="ops-grid-pattern fixed inset-0 opacity-20" />
+      <div className="pointer-events-none fixed inset-x-0 top-0 h-40 bg-gradient-to-b from-[hsl(var(--accent))]/10 to-transparent" />
+
+      <div className="relative z-10 flex min-h-screen gap-4 p-3 lg:p-4">
         <aside
           className={cn(
-            'border-r border-[hsl(var(--border))] bg-[hsl(var(--background))] transition-all duration-200 ease-out',
+            'sticky top-3 h-[calc(100vh-1.5rem)] rounded-[28px] border border-[hsl(var(--border))] bg-[hsl(var(--panel))]/88 shadow-[0_20px_60px_rgba(0,0,0,0.28)] backdrop-blur transition-all duration-200 ease-out',
             sidebarCollapsed ? 'w-[76px]' : 'w-[250px]',
           )}
         >
-          <div className="flex h-14 items-center justify-between border-b border-[hsl(var(--border))] px-3">
+          <div className="flex h-16 items-center justify-between border-b border-[hsl(var(--border))] px-4">
             {!sidebarCollapsed && (
               <div>
-                <p className="text-sm font-semibold tracking-wide">SFD Crowd Ops</p>
-                <p className="text-[11px] text-[hsl(var(--muted-foreground))]">Operations</p>
+                <p className="text-sm font-semibold tracking-tight">SFD Crowd Ops</p>
+                <p className="text-[11px] uppercase tracking-[0.22em] text-[hsl(var(--muted-foreground))]">Mission control</p>
               </div>
             )}
             <Button
@@ -86,7 +89,7 @@ export function Layout({
             </Button>
           </div>
 
-          <nav className="space-y-1 p-2">
+          <nav className="space-y-1 p-3">
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -96,10 +99,10 @@ export function Layout({
                   end={item.to === '/'}
                   className={({ isActive }) =>
                     cn(
-                      'group flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors duration-150',
+                      'group flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm transition-all duration-150',
                       isActive
-                        ? 'text-yellow-300'
-                        : 'text-[hsl(var(--muted-foreground))] hover:text-yellow-200',
+                        ? 'border border-[hsl(var(--accent))]/30 bg-[hsl(var(--accent))]/12 text-[hsl(var(--foreground))]'
+                        : 'border border-transparent text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--panel-2))] hover:text-[hsl(var(--foreground))]',
                     )
                   }
                 >
@@ -111,30 +114,30 @@ export function Layout({
           </nav>
         </aside>
 
-        <div className="flex min-w-0 flex-1 flex-col bg-[hsl(var(--background))]">
-          <header className="border-b border-[hsl(var(--border))] bg-[hsl(var(--background))] px-4 py-3 lg:px-5">
-            <div className="flex flex-wrap items-center gap-2">
+        <div className="flex min-w-0 flex-1 flex-col">
+          <header className="rounded-[28px] border border-[hsl(var(--border))] bg-[hsl(var(--panel))]/82 px-4 py-3 shadow-[0_14px_40px_rgba(0,0,0,0.18)] backdrop-blur lg:px-5">
+            <div className="flex flex-wrap items-center gap-3">
               <button
                 type="button"
                 onClick={() => setCommandOpen(true)}
-                className="group inline-flex h-9 min-w-[250px] items-center gap-2 rounded-md border border-[hsl(var(--border))] bg-[hsl(var(--panel-2))] px-3 text-left text-sm text-[hsl(var(--muted-foreground))] transition-colors hover:border-[hsl(var(--accent))]/60 hover:text-[hsl(var(--foreground))]"
+                className="group inline-flex h-11 min-w-[260px] items-center gap-2 rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--panel-2))] px-4 text-left text-sm text-[hsl(var(--muted-foreground))] transition-colors hover:border-[hsl(var(--accent))]/60 hover:text-[hsl(var(--foreground))]"
               >
                 <Search className="h-4 w-4" />
-                <span className="flex-1">Search</span>
-                <kbd className="rounded border border-[hsl(var(--border))] px-1.5 py-0.5 text-[10px]">⌘K</kbd>
+                <span className="flex-1">Search cameras, alerts, pages</span>
+                <kbd className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--panel))] px-2 py-1 text-[10px]">⌘K</kbd>
               </button>
 
               <div className="ml-auto flex items-center gap-2">
                 {connectionBadge(connectionMode)}
                 <Badge variant="muted">Online {cameraOnline}/{cameras.length || 0}</Badge>
-                <Badge variant="muted">{clock.toLocaleTimeString()}</Badge>
+                <Badge variant="muted">{clock.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' })}</Badge>
                 <AuthControls />
                 <Activity className="h-4 w-4 text-[hsl(var(--muted-foreground))]" />
               </div>
             </div>
           </header>
 
-          <main className="flex-1 overflow-auto p-4 lg:p-5">
+          <main className="flex-1 overflow-auto py-4 lg:py-5">
             <div className="mx-auto w-full max-w-[1700px]">{children}</div>
           </main>
         </div>

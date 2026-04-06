@@ -1,26 +1,26 @@
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
   color-scheme: dark;
-  --font-ui: 'Barlow Semi Condensed', 'DIN Alternate', 'Arial Narrow', 'Segoe UI', sans-serif;
+  --font-ui: 'Manrope', 'Segoe UI', sans-serif;
   --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Menlo, Consolas, monospace;
-  --background: 0 0% 0%;
-  --foreground: 0 0% 92%;
-  --panel: 0 0% 0%;
-  --panel-2: 0 0% 0%;
-  --panel-3: 0 0% 7%;
-  --accent: 48 96% 54%;
-  --accent-2: 45 94% 47%;
-  --accent-foreground: 0 0% 8%;
-  --muted: 0 0% 10%;
-  --muted-foreground: 0 0% 67%;
-  --danger: 7 82% 58%;
-  --danger-2: 7 76% 50%;
-  --border: 0 0% 12%;
-  --ring: 48 96% 54%;
+  --background: 220 24% 10%;
+  --foreground: 210 20% 96%;
+  --panel: 222 22% 14%;
+  --panel-2: 222 19% 18%;
+  --panel-3: 222 17% 24%;
+  --accent: 31 92% 62%;
+  --accent-2: 17 88% 58%;
+  --accent-foreground: 220 28% 10%;
+  --muted: 222 16% 18%;
+  --muted-foreground: 215 14% 70%;
+  --danger: 4 78% 60%;
+  --danger-2: 2 72% 52%;
+  --border: 220 17% 24%;
+  --ring: 31 92% 62%;
 }
 
 * {
@@ -38,7 +38,10 @@ body {
   min-height: 100vh;
   font-family: var(--font-ui);
   letter-spacing: 0;
-  background: hsl(var(--background));
+  background:
+    radial-gradient(circle at top, hsl(213 35% 18% / 0.85), transparent 36%),
+    radial-gradient(circle at 85% 15%, hsl(25 80% 26% / 0.28), transparent 20%),
+    linear-gradient(180deg, hsl(220 25% 12%), hsl(220 22% 10%));
   color: hsl(var(--foreground));
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -68,7 +71,11 @@ textarea {
 }
 
 .ops-grid-pattern {
-  background: none;
+  background-image:
+    linear-gradient(hsl(var(--border) / 0.45) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--border) / 0.45) 1px, transparent 1px);
+  background-position: center;
+  background-size: 32px 32px;
 }
 
 ::-webkit-scrollbar {
